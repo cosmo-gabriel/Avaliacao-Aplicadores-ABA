@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treinamento — Padronização de Procedimentos · Aplicação ABA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700;800&display=swap');
+  :root{
+    --paper:#F2FAF8;--paper-2:#E7F4F1;--surface:#FFFFFF;--surface-2:#FBFFFE;
+    --ink:#17201E;--ink-soft:#4F6661;--muted:#6A817D;--line:#C8E0DA;
+    --petrol:#155B55;--petrol-deep:#063D3B;--petrol-mid:#28B8AD;--petrol-soft:#DDF4F0;
+    --amber:#D99B2B;--amber-soft:#FFF3D4;--rose:#A9483B;--rose-soft:#F8E6E2;
+    --green:#28B8AD;--brand-blue:#1647C8;--brand-blue-deep:#102E6F;
+    --shadow:0 1px 2px rgba(26,43,38,.08),0 18px 44px rgba(26,43,38,.12);
+    --shadow-soft:0 10px 26px rgba(26,43,38,.08);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;font-family:'Archivo',sans-serif;color:var(--ink);overflow:hidden;
+    background:
+      radial-gradient(circle at 12% 0%,rgba(40,184,173,.18),transparent 30%),
+      radial-gradient(circle at 100% 8%,rgba(22,71,200,.12),transparent 28%),
+      linear-gradient(180deg,#F8FFFD 0%,var(--paper) 340px,#E7F4F1 100%);
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.035;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+
+  /* ---------- Deck shell ---------- */
+  .deck{position:fixed;inset:0;z-index:1;}
+  .topbar{position:fixed;top:0;left:0;right:0;height:6px;background:var(--paper-2);z-index:40;}
+  .topbar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--petrol-mid),var(--petrol),var(--brand-blue));transition:width .35s cubic-bezier(.2,.7,.2,1);}
+
+  .header{position:fixed;top:6px;left:0;right:0;height:54px;display:flex;align-items:center;gap:14px;
+    padding:0 clamp(14px,3vw,34px);z-index:30;background:rgba(248,255,253,.78);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .header .logo{width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid var(--line);padding:4px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft);flex:none;}
+  .header .logo img{width:100%;height:100%;object-fit:contain;}
+  .header .brand{font-weight:800;font-size:13px;letter-spacing:.02em;color:var(--petrol-deep);white-space:nowrap;}
+  .header .blocklabel{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--petrol);background:var(--petrol-soft);padding:5px 11px;border-radius:999px;border:1px solid var(--line);}
+  .header .spacer{flex:1;}
+  .header .timebadge{font-size:11.5px;font-weight:800;color:var(--amber);background:var(--amber-soft);padding:5px 10px;border-radius:999px;border:1px solid #f0dca6;white-space:nowrap;}
+  .header .counter{font-variant-numeric:tabular-nums;font-size:12.5px;font-weight:800;color:var(--ink-soft);white-space:nowrap;}
+  .header .idxbtn{border:1px solid var(--line);background:#fff;color:var(--petrol);font-family:'Archivo';font-weight:800;font-size:12px;padding:6px 11px;border-radius:9px;cursor:pointer;transition:.15s;}
+  .header .idxbtn:hover{background:var(--petrol-soft);}
+
+  .stage{position:absolute;top:60px;bottom:64px;left:0;right:0;}
+  .slide{position:absolute;inset:0;display:none;overflow-y:auto;padding:clamp(16px,3vh,30px) clamp(16px,4vw,40px) 30px;}
+  .slide.active{display:block;}
+  .slide.active .slide-inner{animation:rise .5s cubic-bezier(.2,.7,.2,1) both;}
+  @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .slide-inner{max-width:1080px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;justify-content:center;}
+
+  /* ---------- Footer nav ---------- */
+  .footer{position:fixed;bottom:0;left:0;right:0;height:56px;display:flex;align-items:center;gap:12px;
+    padding:0 clamp(14px,3vw,34px);z-index:30;background:rgba(248,255,253,.85);backdrop-filter:blur(10px);border-top:1px solid var(--line);}
+  .nav{border:1px solid var(--petrol);background:#fff;color:var(--petrol);font-family:'Archivo';font-weight:800;font-size:13.5px;
+    padding:9px 16px;border-radius:11px;cursor:pointer;transition:.15s;}
+  .nav:hover{background:var(--petrol);color:#fff;transform:translateY(-1px);box-shadow:0 8px 16px rgba(21,91,85,.18);}
+  .nav:disabled{opacity:.35;cursor:default;transform:none;box-shadow:none;background:#fff;color:var(--petrol);}
+  .nav.primary{background:var(--petrol);color:#fff;}
+  .nav.primary:hover{background:var(--petrol-deep);}
+  .footer .spacer{flex:1;}
+  .timer{display:flex;align-items:center;gap:7px;font-variant-numeric:tabular-nums;font-weight:800;color:var(--petrol-deep);font-size:13px;background:#fff;border:1px solid var(--line);padding:6px 10px;border-radius:10px;}
+  .timer button{border:none;background:transparent;cursor:pointer;color:var(--petrol);font-weight:800;font-size:13px;font-family:'Archivo';padding:2px 4px;}
+  .timer .tlabel{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;}
+
+  /* ---------- Cover ---------- */
+  .cover{position:relative;border:1px solid rgba(7,60,57,.22);border-radius:24px;padding:clamp(26px,4vw,46px);color:#fff;overflow:hidden;box-shadow:var(--shadow);
+    background:linear-gradient(135deg,rgba(6,61,59,.98),rgba(21,91,85,.94) 52%,rgba(22,71,200,.88)),linear-gradient(90deg,rgba(40,184,173,.28),transparent);}
+  .cover::after{content:"";position:absolute;right:-90px;top:-120px;width:360px;height:360px;border:1px solid rgba(255,255,255,.18);border-radius:50%;box-shadow:0 0 0 36px rgba(255,255,255,.045),0 0 0 78px rgba(255,255,255,.025);}
+  .cover .clogo{position:absolute;right:clamp(18px,3vw,38px);top:clamp(18px,3vw,30px);z-index:2;width:clamp(72px,9vw,112px);aspect-ratio:1;background:rgba(255,250,242,.94);border:1px solid rgba(255,255,255,.55);border-radius:18px;padding:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 16px 36px rgba(0,0,0,.18);}
+  .cover .clogo img{width:100%;height:100%;object-fit:contain;}
+  .cover .kicker{position:relative;z-index:1;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:#9EF2EA;font-weight:800;margin:0 0 12px;}
+  .cover h1{position:relative;z-index:1;font-family:'Fraunces',serif;font-weight:700;font-size:clamp(30px,5vw,56px);line-height:1;margin:0 0 14px;max-width:880px;}
+  .cover .sub{position:relative;z-index:1;font-size:15.5px;color:rgba(255,255,255,.86);max-width:70ch;margin:0;}
+  .meta-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:26px 0 0;}
+  .field{min-width:0;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 12px;backdrop-filter:blur(6px);}
+  .field label{display:block;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.72);font-weight:800;margin-bottom:5px;}
+  .field input{width:100%;border:none;background:transparent;font-family:'Archivo';font-size:14px;color:#fff;padding:3px 0;min-width:0;}
+  .field input::placeholder{color:rgba(255,255,255,.5);}
+  .field input:focus{outline:none;}
+  .field:focus-within{border-color:#9EF2EA;background:rgba(255,255,255,.16);}
+
+  /* ---------- Typographic blocks ---------- */
+  .eyebrow{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--petrol);font-weight:800;margin:0 0 8px;}
+  h2.title{font-family:'Fraunces',serif;font-weight:700;font-size:clamp(26px,3.8vw,42px);line-height:1.04;margin:0 0 6px;color:var(--petrol-deep);}
+  .subtitle{font-size:15px;color:var(--ink-soft);margin:0 0 20px;max-width:74ch;}
+  .lead{font-size:16px;color:var(--ink);max-width:72ch;margin:0 0 16px;}
+  .lead b{color:var(--petrol-deep);}
+  .hr{height:1px;background:var(--line);border:0;margin:18px 0;}
+
+  /* ---------- Cards / grids ---------- */
+  .grid{display:grid;gap:14px;}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .g4{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px;box-shadow:var(--shadow-soft);}
+  .card h3{font-family:'Fraunces',serif;font-size:18px;margin:0 0 6px;color:var(--petrol-deep);}
+  .card p{margin:0;font-size:14px;color:var(--ink-soft);}
+  .card .tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--petrol);background:var(--petrol-soft);border:1px solid var(--line);border-radius:999px;padding:4px 9px;margin-bottom:8px;}
+
+  /* agenda list */
+  .agenda{display:flex;flex-direction:column;gap:10px;}
+  .agenda .row{display:grid;grid-template-columns:74px 1fr auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--petrol);border-radius:14px;padding:13px 16px;box-shadow:var(--shadow-soft);}
+  .agenda .row.brk{border-left-color:var(--amber);background:var(--amber-soft);}
+  .agenda .time{font-family:'Fraunces',serif;font-weight:700;font-size:16px;color:var(--petrol);}
+  .agenda .what b{display:block;font-size:15px;color:var(--ink);}
+  .agenda .what span{font-size:12.5px;color:var(--muted);}
+  .agenda .dur{font-size:12px;font-weight:800;color:var(--ink-soft);background:var(--paper-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px;white-space:nowrap;}
+
+  /* callouts */
+  .callout{border-radius:0 16px 16px 0;padding:15px 18px;margin:14px 0;font-size:14.5px;}
+  .callout .ctitle{font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 6px;}
+  .callout.info{border-left:5px solid var(--petrol);background:var(--petrol-soft);}
+  .callout.info .ctitle{color:var(--petrol-deep);}
+  .callout.amber{border-left:5px solid var(--amber);background:var(--amber-soft);color:#5a4516;}
+  .callout.amber .ctitle{color:#8a6914;}
+  .callout.rose{border-left:5px solid var(--rose);background:var(--rose-soft);color:#6e2c22;}
+  .callout.rose .ctitle{color:var(--rose);}
+
+  /* prompt type cards (expandable) */
+  .prompts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  .pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-soft);}
+  .pcard .ph{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;}
+  .pcard .sig{font-family:'Fraunces',serif;font-weight:700;font-size:16px;color:#fff;background:var(--petrol);border-radius:9px;padding:6px 10px;min-width:48px;text-align:center;letter-spacing:.02em;}
+  .pcard.intra .sig{background:var(--brand-blue);}
+  .pcard .pt{flex:1;min-width:0;}
+  .pcard .pt b{display:block;font-size:14.5px;color:var(--ink);}
+  .pcard .pt span{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .pcard .chev{color:var(--ink-soft);transition:transform .25s;}
+  .pcard.open .chev{transform:rotate(180deg);}
+  .pcard .pb{display:none;padding:0 16px 16px;font-size:13.5px;color:var(--ink-soft);}
+  .pcard.open .pb{display:block;}
+
+  /* flow / decision */
+  .flow{display:flex;flex-direction:column;gap:10px;}
+  .fstep{display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-soft);}
+  .fstep .n{font-family:'Fraunces',serif;font-weight:700;font-size:20px;color:var(--petrol);min-width:30px;}
+  .fstep .ft b{font-size:15px;}
+  .fstep .ft p{margin:3px 0 0;font-size:13.5px;color:var(--ink-soft);}
+  .fork{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+  .branch{border-radius:14px;padding:14px 16px;color:#fff;}
+  .branch b{display:block;font-size:13px;margin-bottom:4px;}
+  .branch p{margin:0;font-size:13px;opacity:.95;}
+  .branch.ok{background:linear-gradient(135deg,var(--petrol),var(--green));}
+  .branch.err{background:linear-gradient(135deg,var(--rose),#c25a4c);}
+  .branch.no{background:linear-gradient(135deg,var(--amber),#c98b22);}
+
+  /* checklist */
+  .checklist{display:flex;flex-direction:column;gap:9px;}
+  .chk{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 15px;cursor:pointer;box-shadow:var(--shadow-soft);transition:.15s;user-select:none;}
+  .chk:hover{border-color:var(--petrol);}
+  .chk .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;transition:.15s;}
+  .chk.on{background:var(--petrol-soft);border-color:var(--petrol);}
+  .chk.on .box{background:var(--petrol);border-color:var(--petrol);}
+  .chk .lbl{font-size:14.5px;font-weight:600;}
+  .chk .lbl span{display:block;font-weight:400;font-size:12.5px;color:var(--muted);}
+
+  /* reveal */
+  .reveal{margin:8px 0;}
+  .reveal .rbtn{border:1px dashed var(--petrol);background:var(--petrol-soft);color:var(--petrol-deep);font-family:'Archivo';font-weight:800;font-size:13.5px;padding:11px 16px;border-radius:11px;cursor:pointer;transition:.15s;}
+  .reveal .rbtn:hover{background:var(--petrol);color:#fff;}
+  .reveal .rbody{display:none;margin-top:10px;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--green);border-radius:0 12px 12px 0;padding:14px 16px;font-size:14px;}
+  .reveal.shown .rbody{display:block;animation:rise .35s ease both;}
+  .reveal.shown .rbtn{display:none;}
+
+  /* quiz + simulator */
+  .quiz,.sim{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow-soft);margin:10px 0;}
+  .quiz .q,.sim .scn{font-size:15.5px;font-weight:600;margin:0 0 4px;color:var(--ink);}
+  .quiz .qmeta,.sim .smeta{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;}
+  .opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{text-align:left;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:'Archivo';font-size:14px;font-weight:600;padding:12px 15px;border-radius:11px;cursor:pointer;transition:.15s;display:flex;gap:10px;align-items:flex-start;}
+  .opt:hover{border-color:var(--petrol);transform:translateY(-1px);box-shadow:0 6px 14px rgba(21,91,85,.1);}
+  .opt .ol{font-weight:800;color:var(--petrol);flex:none;}
+  .opt.correct{background:var(--petrol-soft);border-color:var(--petrol);color:var(--petrol-deep);}
+  .opt.correct .ol{color:var(--petrol);}
+  .opt.wrong{background:var(--rose-soft);border-color:var(--rose);color:#6e2c22;}
+  .opt.wrong .ol{color:var(--rose);}
+  .opt.disabled{cursor:default;transform:none;box-shadow:none;}
+  .fb{display:none;margin-top:12px;border-radius:0 12px 12px 0;padding:12px 15px;font-size:13.5px;}
+  .fb.show{display:block;animation:rise .3s ease both;}
+  .fb.good{border-left:5px solid var(--green);background:var(--petrol-soft);color:var(--petrol-deep);}
+  .fb.bad{border-left:5px solid var(--amber);background:var(--amber-soft);color:#5a4516;}
+
+  /* video slot */
+  .video-slot{margin:12px 0;}
+  .video-frame{position:relative;width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,var(--petrol-deep),var(--petrol));border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);}
+  .video-frame iframe,.video-frame video{position:absolute;inset:0;width:100%;height:100%;border:0;}
+  .video-empty{text-align:center;color:#cfeee9;padding:24px;}
+  .video-empty .play{width:64px;height:64px;border-radius:50%;border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:24px;}
+  .video-empty b{display:block;font-family:'Fraunces',serif;font-size:18px;color:#fff;margin-bottom:4px;}
+  .video-add{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .video-add input{flex:1;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-family:'Archivo';font-size:13.5px;background:var(--surface-2);}
+  .video-add input:focus{outline:none;border-color:var(--petrol);box-shadow:0 0 0 3px rgba(21,91,85,.12);}
+  .video-add button{border:1px solid var(--petrol);background:var(--petrol);color:#fff;font-family:'Archivo';font-weight:800;font-size:13px;padding:10px 16px;border-radius:10px;cursor:pointer;}
+  .video-add button:hover{background:var(--petrol-deep);}
+  .video-hint{font-size:12px;color:var(--muted);margin:8px 2px 0;}
+
+  /* synthesis table */
+  table.syn{width:100%;border-collapse:collapse;background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-soft);font-size:13.5px;}
+  table.syn th{background:var(--petrol);color:#fff;text-align:left;padding:11px 14px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;}
+  table.syn td{padding:11px 14px;border-top:1px solid var(--line);color:var(--ink);vertical-align:top;}
+  table.syn tr:nth-child(even) td{background:var(--surface-2);}
+  table.syn td b{color:var(--petrol-deep);}
+
+  /* kpi big */
+  .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center;box-shadow:var(--shadow-soft);}
+  .kpi .num{font-family:'Fraunces',serif;font-weight:700;font-size:38px;color:var(--petrol);line-height:1;}
+  .kpi .lab{font-size:13px;color:var(--ink-soft);margin-top:6px;}
+  .kpi .ctx{font-size:11.5px;color:var(--muted);margin-top:4px;}
+
+  /* role badges */
+  .roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+  .role{border-radius:14px;padding:15px;color:#fff;}
+  .role b{display:block;font-family:'Fraunces',serif;font-size:17px;margin-bottom:6px;}
+  .role ul{margin:0;padding-left:18px;font-size:13px;}
+  .role.r1{background:linear-gradient(135deg,var(--petrol),var(--petrol-deep));}
+  .role.r2{background:linear-gradient(135deg,var(--brand-blue),var(--brand-blue-deep));}
+  .role.r3{background:linear-gradient(135deg,var(--amber),#b97f1d);}
+
+  /* score panel */
+  .scorebar{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 18px;box-shadow:var(--shadow-soft);margin-bottom:14px;}
+  .scorebar .big{font-family:'Fraunces',serif;font-weight:700;font-size:32px;color:var(--petrol);}
+  .scorebar .lab{font-size:13px;color:var(--ink-soft);}
+
+  /* pills */
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px;}
+  .pill{font-size:12.5px;font-weight:700;color:var(--petrol-deep);background:var(--petrol-soft);border:1px solid var(--line);border-radius:999px;padding:7px 13px;}
+
+  ul.clean{margin:6px 0;padding-left:20px;}
+  ul.clean li{margin:5px 0;font-size:14.5px;}
+  .commit{display:flex;flex-direction:column;gap:10px;}
+  .commit .c{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--brand-blue);border-radius:0 12px 12px 0;padding:13px 16px;box-shadow:var(--shadow-soft);}
+  .commit .c .n{font-family:'Fraunces',serif;font-weight:700;color:var(--brand-blue);font-size:18px;}
+
+  /* index overlay */
+  .overlay{position:fixed;inset:0;z-index:60;background:rgba(6,30,28,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:24px;}
+  .overlay.show{display:flex;animation:rise .25s ease both;}
+  .idxpanel{background:var(--surface);border-radius:20px;max-width:760px;width:100%;max-height:84vh;overflow:auto;padding:24px;box-shadow:var(--shadow);}
+  .idxpanel h3{font-family:'Fraunces',serif;font-size:22px;margin:0 0 14px;color:var(--petrol-deep);}
+  .idxgroup{margin-bottom:14px;}
+  .idxgroup .gl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:var(--petrol);margin:0 0 6px;}
+  .idxlink{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:14px;border:1px solid transparent;}
+  .idxlink:hover{background:var(--petrol-soft);border-color:var(--line);}
+  .idxlink .gi{color:var(--muted);font-variant-numeric:tabular-nums;font-weight:800;font-size:12px;}
+  .idxclose{float:right;border:1px solid var(--line);background:#fff;color:var(--petrol);font-weight:800;font-family:'Archivo';border-radius:9px;padding:6px 12px;cursor:pointer;}
+
+  .hintbar{position:fixed;bottom:64px;left:50%;transform:translateX(-50%);background:var(--petrol-deep);color:#fff;font-size:12px;padding:7px 14px;border-radius:999px;z-index:25;opacity:.0;transition:opacity .4s;pointer-events:none;}
+  .hintbar.show{opacity:.92;}
+
+  @media (max-width:820px){
+    .g2,.g3,.g4,.prompts,.kpis,.roles,.fork,.meta-grid{grid-template-columns:1fr;}
+    .header .brand{display:none;}
+    .agenda .row{grid-template-columns:60px 1fr;}
+    .agenda .dur{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-fill" id="topfill"></div></div>
+
+<div class="header">
+  <div class="logo"><img src="{{LOGO}}" alt="Espaço Singular"></div>
+  <span class="brand">Espaço Singular</span>
+  <span class="blocklabel" id="blocklabel">Abertura</span>
+  <span class="spacer"></span>
+  <span class="timebadge" id="timebadge">4h · prático</span>
+  <span class="counter" id="counter">1 / 1</span>
+  <button class="idxbtn" onclick="openIndex()">Índice</button>
+</div>
+
+<div class="deck">
+  <div class="stage" id="stage">
+
+  <!-- ============ ABERTURA ============ -->
+  <section class="slide" data-block="Abertura" data-title="Capa">
+    <div class="slide-inner">
+      <div class="cover">
+        <div class="clogo"><img src="{{LOGO}}" alt="Espaço Singular"></div>
+        <p class="kicker">Treinamento de equipe · Aplicação ABA · 4 horas · prático</p>
+        <h1>Padronização de Procedimentos na Aplicação ABA</h1>
+        <p class="sub">Um padrão único de aplicação para toda a equipe: controle instrucional, hierarquia de dicas, registro ABA+ e reforçamento diferencial — treinados com demonstração em vídeo e prática guiada.</p>
+        <div class="meta-grid">
+          <div class="field"><label>Facilitador(a)</label><input placeholder="Nome"></div>
+          <div class="field"><label>Data</label><input type="date"></div>
+          <div class="field"><label>Turma / Unidade</label><input placeholder="Ex.: Unidade 2"></div>
+          <div class="field"><label>Participantes</label><input placeholder="Nº"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Abertura" data-title="Por que padronizar">
+    <div class="slide-inner">
+      <p class="eyebrow">Abertura · 10 min</p>
+      <h2 class="title">Por que padronizar a aplicação?</h2>
+      <p class="subtitle">Quando cada aplicador faz de um jeito, o aprendiz aprende mais devagar e os dados perdem confiabilidade. Padronizar é proteger o cliente e o terapeuta.</p>
+      <div class="grid g3">
+        <div class="card"><span class="tag">Cliente</span><h3>Aquisição mais rápida</h3><p>Procedimentos consistentes reduzem erro, fuga e esquiva, e tornam o ensino menos aversivo.</p></div>
+        <div class="card"><span class="tag">Dados</span><h3>Decisão confiável</h3><p>Se todos registram igual, os gráficos refletem o cliente — não o estilo de cada aplicador.</p></div>
+        <div class="card"><span class="tag">Equipe</span><h3>Fidelidade procedimental</h3><p>Qualquer pessoa da equipe consegue dar continuidade ao programa com o mesmo resultado.</p></div>
+      </div>
+      <div class="callout info"><p class="ctitle">Regra de ouro do dia</p>Em caso de dúvida: <b>siga o programa e consulte a supervisão. Não improvise procedimentos.</b></div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Abertura" data-title="Agenda das 4h">
+    <div class="slide-inner">
+      <p class="eyebrow">Sumário · como serão as 4 horas</p>
+      <h2 class="title">Agenda</h2>
+      <div class="agenda">
+        <div class="row"><span class="time">0:00</span><div class="what"><b>Abertura</b><span>Por que padronizar · regras do dia</span></div><span class="dur">10 min</span></div>
+        <div class="row"><span class="time">0:10</span><div class="what"><b>Bloco 1 — Controle instrucional antes do SD</b><span>HRE · erro × não-resposta · latência</span></div><span class="dur">30 min</span></div>
+        <div class="row"><span class="time">0:40</span><div class="what"><b>Bloco 2 — Hierarquia de dicas (prompts)</b><span>Tipos · most-to-least × least-to-most · fading</span></div><span class="dur">45 min</span></div>
+        <div class="row brk"><span class="time">1:25</span><div class="what"><b>Intervalo</b><span>Pausa</span></div><span class="dur">15 min</span></div>
+        <div class="row"><span class="time">1:40</span><div class="what"><b>Bloco 3 — Sistema de registro ABA+</b><span>Os 4 registros · fluxo · simulador</span></div><span class="dur">45 min</span></div>
+        <div class="row"><span class="time">2:25</span><div class="what"><b>Bloco 4 — Reforçamento diferencial</b><span>Tempos · magnitude · individualização</span></div><span class="dur">40 min</span></div>
+        <div class="row"><span class="time">3:05</span><div class="what"><b>Bloco 5 — Integração prática + fidelidade</b><span>Erros comuns · role-play · checagem</span></div><span class="dur">35 min</span></div>
+        <div class="row"><span class="time">3:40</span><div class="what"><b>Fechamento</b><span>Provando seu conhecimento · compromissos</span></div><span class="dur">20 min</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BLOCO 1 ============ -->
+  <section class="slide" data-block="Bloco 1 · Controle instrucional" data-title="Abertura do Bloco 1">
+    <div class="slide-inner">
+      <p class="eyebrow">Bloco 1 · 30 min · prático</p>
+      <h2 class="title">Controle instrucional antes do SD</h2>
+      <p class="subtitle">Muitas vezes o erro não é da criança — é do SD apresentado sem atenção. Antes de qualquer tentativa, garantimos que o aprendiz está disponível para aprender.</p>
+      <div class="callout info"><p class="ctitle">O que você vai treinar aqui</p>Conferir o HRE e a atenção antes do SD · diferenciar <b>erro</b> de <b>não-resposta</b> · respeitar a latência de 3–5 s.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 1 · Controle instrucional" data-title="Checklist pré-SD">
+    <div class="slide-inner">
+      <p class="eyebrow">Atividade · checklist clicável</p>
+      <h2 class="title">Antes de apresentar o SD, confira</h2>
+      <p class="subtitle">Marque cada item com a equipe. Só apresentamos o SD quando os quatro estiverem garantidos.</p>
+      <div class="checklist">
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Está olhando para o material?<span>Contato visual com o estímulo relevante.</span></div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Está ouvindo?<span>Atenção auditiva disponível para a instrução.</span></div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Está disponível para aprender?<span>Sem engajar em comportamento concorrente.</span></div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Está em HRE — Feliz, Relaxado e Engajado?<span>O HRE é a bússola da sessão.</span></div></div>
+      </div>
+      <div class="callout amber"><p class="ctitle">Lembrete</p>Se algum item falhar, primeiro <b>recupera-se a atenção</b> e depois <b>reapresenta-se o SD</b>. Isso não é erro do aprendiz.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 1 · Controle instrucional" data-title="Erro × Não-resposta">
+    <div class="slide-inner">
+      <p class="eyebrow">Conceito-chave</p>
+      <h2 class="title">Erro não é a mesma coisa que não-resposta</h2>
+      <div class="grid g2">
+        <div class="card"><span class="tag" style="color:var(--rose);background:var(--rose-soft)">Erro → (−)</span><h3>Respondeu errado</h3><p><b>SD:</b> "Mostra o copo." A criança aponta para a bola. Houve uma resposta, mas incorreta. <b>Registrar (−)</b> e aplicar o procedimento de correção.</p></div>
+        <div class="card"><span class="tag" style="color:#8a6914;background:var(--amber-soft)">Não-resposta</span><h3>Não respondeu</h3><p><b>SD:</b> "Mostra o copo." A criança fica olhando para o teto. Não houve resposta. Aplicar o <b>procedimento previsto para ausência de resposta</b> (dica) — não é (−).</p></div>
+      </div>
+      <div class="callout rose"><p class="ctitle">O que NÃO registrar como erro</p>Criança olhando para outro lado · mexendo em outro brinquedo · em fuga <b>antes de contatar o SD</b>. Nesses casos: recupera atenção e reapresenta o SD.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 1 · Controle instrucional" data-title="Vídeo: recuperar atenção e SD">
+    <div class="slide-inner">
+      <p class="eyebrow">Demonstração de procedimento</p>
+      <h2 class="title">Vídeo — controle instrucional e apresentação do SD</h2>
+      <p class="subtitle">Observe: como o aplicador garante o HRE, recupera a atenção e só então apresenta um SD claro e único.</p>
+      <div class="video-slot" data-src="">
+        <div class="video-frame"><div class="video-empty"><div class="play">&#9658;</div><b>Slot de vídeo de demonstração</b><span>Cole o link abaixo ou deixe pré-carregado.</span></div></div>
+        <div class="video-add"><input type="text" placeholder="Cole o link do vídeo (YouTube, Vimeo ou .mp4)"><button>Carregar vídeo</button></div>
+        <p class="video-hint">Dica: para deixar o vídeo fixo, abra o arquivo num editor e preencha <b>data-src="…"</b> neste slot.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 1 · Controle instrucional" data-title="Prática: erro ou não-resposta?">
+    <div class="slide-inner">
+      <p class="eyebrow">Atividade prática · classifique</p>
+      <h2 class="title">Erro, não-resposta ou nem registrar?</h2>
+      <div class="quiz" data-answer="1">
+        <p class="q">SD: "Bate na mesa." A criança bate na cabeça do boneco.</p>
+        <p class="qmeta">Escolha a classificação correta</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> Não-resposta → aplicar dica</button>
+          <button class="opt"><span class="ol">B</span> Erro → registrar (−) e corrigir</button>
+          <button class="opt"><span class="ol">C</span> Não registrar → recuperar atenção</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+      <div class="quiz" data-answer="2">
+        <p class="q">SD: "Aponta o carro." A criança está de costas, mexendo noutro brinquedo, e não contatou o SD.</p>
+        <p class="qmeta">Escolha a classificação correta</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> Erro → registrar (−)</button>
+          <button class="opt"><span class="ol">B</span> Não-resposta → aplicar dica</button>
+          <button class="opt"><span class="ol">C</span> Não registrar → recuperar atenção e reapresentar o SD</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 1 · Controle instrucional" data-title="Fluxo SD → resposta">
+    <div class="slide-inner">
+      <p class="eyebrow">Padrão · o que fazer após o SD</p>
+      <h2 class="title">SD → Respondeu?</h2>
+      <p class="subtitle">Latência: espere de <b>3 a 5 segundos</b>. Depois disso, aplique a dica prevista.</p>
+      <div class="fork">
+        <div class="branch ok"><b>Sim, correto</b><p>Reforça (e registra conforme a fase do programa).</p></div>
+        <div class="branch err"><b>Sim, incorreto</b><p>Procedimento de correção — não "ajuda" solta.</p></div>
+        <div class="branch no"><b>Não respondeu</b><p>Reapresenta ou aplica a dica conforme o programa.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BLOCO 2 ============ -->
+  <section class="slide" data-block="Bloco 2 · Hierarquia de dicas" data-title="Abertura do Bloco 2">
+    <div class="slide-inner">
+      <p class="eyebrow">Bloco 2 · 45 min · prático</p>
+      <h2 class="title">Hierarquia de dicas (prompts)</h2>
+      <p class="subtitle">Dica é toda ajuda que aumenta a probabilidade de resposta correta. O objetivo do prompt é ensinar <b>independência</b> — então toda dica precisa ser desvanecida.</p>
+      <div class="pills"><span class="pill">Extraestímulo</span><span class="pill">Intraestímulo</span><span class="pill">Most-to-least</span><span class="pill">Least-to-most</span><span class="pill">Fading</span></div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 2 · Hierarquia de dicas" data-title="Extra × Intraestímulo">
+    <div class="slide-inner">
+      <p class="eyebrow">Conceito</p>
+      <h2 class="title">Dois grandes tipos de ajuda</h2>
+      <div class="grid g2">
+        <div class="card"><span class="tag">Extraestímulo</span><h3>Ajuda adicional ao SD</h3><p>Acrescenta-se algo (físico, imitativo, verbal, ecoico, gestual) para evocar a resposta — sem mudar o próprio SD.</p></div>
+        <div class="card"><span class="tag" style="color:var(--brand-blue);background:#e2e9fb">Intraestímulo</span><h3>Manipula o próprio SD</h3><p>Altera características do estímulo discriminativo (tamanho, posição, destaque) para aumentar a resposta correta do aprendiz.</p></div>
+      </div>
+      <div class="callout info"><p class="ctitle">Definição — intraestímulo</p>Toda ajuda que <b>manipula o estímulo discriminativo (SD)</b> para que ocorra um aumento da resposta correta do aprendiz.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 2 · Hierarquia de dicas" data-title="Tipos de dica">
+    <div class="slide-inner">
+      <p class="eyebrow">Referência · toque para expandir</p>
+      <h2 class="title">Tipos de dica (prompts)</h2>
+      <div class="prompts">
+        <div class="pcard" onclick="this.classList.toggle('open')"><div class="ph"><span class="sig">AFT</span><div class="pt"><b>Ajuda Física Total</b><span>Extraestímulo</span></div><span class="chev">&#9662;</span></div><div class="pb">Guia completamente a resposta do aprendiz por contato físico.</div></div>
+        <div class="pcard" onclick="this.classList.toggle('open')"><div class="ph"><span class="sig">AFP</span><div class="pt"><b>Ajuda Física Parcial</b><span>Extraestímulo</span></div><span class="chev">&#9662;</span></div><div class="pb">Fornece apenas o nível mínimo de auxílio físico necessário.</div></div>
+        <div class="pcard" onclick="this.classList.toggle('open')"><div class="ph"><span class="sig">AI</span><div class="pt"><b>Ajuda Imitativa</b><span>Extraestímulo</span></div><span class="chev">&#9662;</span></div><div class="pb">Demonstra a resposta desejada para que o aprendiz a imite.</div></div>
+        <div class="pcard" onclick="this.classList.toggle('open')"><div class="ph"><span class="sig">AV</span><div class="pt"><b>Ajuda Verbal</b><span>Extraestímulo</span></div><span class="chev">&#9662;</span></div><div class="pb">Fornece pistas verbais adicionais.</div></div>
+        <div class="pcard" onclick="this.classList.toggle('open')"><div class="ph"><span class="sig">AE</span><div class="pt"><b>Ajuda Ecoica Total</b><span>Extraestímulo</span></div><span class="chev">&#9662;</span></div><div class="pb">Modelo verbal completo para repetição.</div></div>
+        <div class="pcard" onclick="this.classList.toggle('open')"><div class="ph"><span class="sig">AG</span><div class="pt"><b>Ajuda Gestual</b><span>Extraestímulo</span></div><span class="chev">&#9662;</span></div><div class="pb">Toda ajuda a partir de gestos para aumentar a emissão da resposta correta.</div></div>
+        <div class="pcard intra" onclick="this.classList.toggle('open')"><div class="ph"><span class="sig">AIE</span><div class="pt"><b>Manipulação do SD</b><span>Intraestímulo</span></div><span class="chev">&#9662;</span></div><div class="pb">Manipula características do SD para aumentar respostas corretas.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 2 · Hierarquia de dicas" data-title="Most-to-least × Least-to-most">
+    <div class="slide-inner">
+      <p class="eyebrow">Decisão · qual hierarquia usar</p>
+      <h2 class="title">Most-to-least × Least-to-most</h2>
+      <div class="grid g2">
+        <div class="card"><span class="tag">Most-to-least</span><h3>Em toda a aquisição</h3><p>Enquanto o alvo está passando pelas dicas programadas. Da dica mais intrusiva para a menos intrusiva. Acelera a aquisição e <b>reduz erro, fuga e esquiva</b> — não torna a sessão aversiva.</p></div>
+        <div class="card"><span class="tag" style="color:var(--brand-blue);background:#e2e9fb">Least-to-most</span><h3>Quando já está em independente (+)</h3><p>Se o aprendiz precisar de ajuda, apresenta-se o procedimento de correção com dicas <b>menos intrusivas até mais intrusivas</b>.</p></div>
+      </div>
+      <div class="callout info"><p class="ctitle">Em uma frase</p>Aquisição → <b>most-to-least</b>. Já independente, mas precisou de ajuda → <b>least-to-most</b>.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 2 · Hierarquia de dicas" data-title="Vídeo: hierarquia e fading">
+    <div class="slide-inner">
+      <p class="eyebrow">Demonstração de procedimento</p>
+      <h2 class="title">Vídeo — usar a hierarquia de dicas e desvanecer</h2>
+      <p class="subtitle">Observe a leitura fina do suporte necessário e o momento de reduzir a dica (fading).</p>
+      <div class="video-slot" data-src="">
+        <div class="video-frame"><div class="video-empty"><div class="play">&#9658;</div><b>Slot de vídeo de demonstração</b><span>Cole o link abaixo ou deixe pré-carregado.</span></div></div>
+        <div class="video-add"><input type="text" placeholder="Cole o link do vídeo (YouTube, Vimeo ou .mp4)"><button>Carregar vídeo</button></div>
+        <p class="video-hint">Sugestão: filme a própria equipe aplicando — vídeos do dia a dia da clínica ensinam mais que exemplos genéricos.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 2 · Hierarquia de dicas" data-title="Prática: identifique a dica">
+    <div class="slide-inner">
+      <p class="eyebrow">Atividade prática · identifique a dica</p>
+      <h2 class="title">Qual dica está sendo usada?</h2>
+      <div class="quiz" data-answer="0">
+        <p class="q">A terapeuta diz "macaco" inteiro para a criança repetir ao ver a figura.</p>
+        <p class="qmeta">Selecione a sigla correta</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> AE — Ajuda Ecoica Total (modelo verbal completo)</button>
+          <button class="opt"><span class="ol">B</span> AV — Ajuda Verbal (pista verbal adicional)</button>
+          <button class="opt"><span class="ol">C</span> AIE — Manipulação do SD</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+      <div class="quiz" data-answer="1">
+        <p class="q">Entre 3 cartões, a terapeuta deixa o cartão-alvo bem maior e mais perto da criança.</p>
+        <p class="qmeta">Selecione a sigla correta</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> AG — Ajuda Gestual</button>
+          <button class="opt"><span class="ol">B</span> AIE — Manipulação do SD (intraestímulo)</button>
+          <button class="opt"><span class="ol">C</span> AFP — Ajuda Física Parcial</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 2 · Hierarquia de dicas" data-title="Fading e dependência">
+    <div class="slide-inner">
+      <p class="eyebrow">Padrão · esvanecimento</p>
+      <h2 class="title">Desvanecer a dica é parte do procedimento</h2>
+      <div class="callout info"><p class="ctitle">Objetivo do prompt</p>Ensinar <b>independência</b>. A dica é uma ponte temporária, nunca o destino.</div>
+      <div class="callout amber"><p class="ctitle">Sinal de alerta — dependência de dica</p>Se o aprendiz não responde sozinho e está preso à dica, <b>alerte a supervisão</b> para a alteração devida no critério. Não mantenha a dica indefinidamente nem invente um novo nível.</div>
+    </div>
+  </section>
+
+  <!-- ============ INTERVALO ============ -->
+  <section class="slide" data-block="Intervalo" data-title="Intervalo">
+    <div class="slide-inner">
+      <div class="cover" style="text-align:center;">
+        <div class="clogo"><img src="{{LOGO}}" alt="Espaço Singular"></div>
+        <p class="kicker" style="text-align:left;">Pausa · 15 minutos</p>
+        <h1 style="margin:0 auto 10px;">Intervalo</h1>
+        <p class="sub" style="margin:0 auto;">Voltamos para o <b>Bloco 3 — Sistema de registro ABA+</b>, com simulador prático de coleta de dados.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BLOCO 3 ============ -->
+  <section class="slide" data-block="Bloco 3 · Registro ABA+" data-title="Abertura do Bloco 3">
+    <div class="slide-inner">
+      <p class="eyebrow">Bloco 3 · 45 min · prático</p>
+      <h2 class="title">Sistema de registro ABA+</h2>
+      <p class="subtitle">Registrar igual é o que torna os dados comparáveis entre aplicadores. São quatro registros — e a regra muda conforme o programa esteja em ensino ou em independência.</p>
+      <div class="pills"><span class="pill">(+) acerto independente</span><span class="pill">Dica registrada</span><span class="pill">(−) erro sem dica</span><span class="pill">(−) erro com dica</span></div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 3 · Registro ABA+" data-title="Os 4 registros">
+    <div class="slide-inner">
+      <p class="eyebrow">Referência</p>
+      <h2 class="title">Os quatro registros</h2>
+      <div class="grid g2">
+        <div class="card"><span class="tag">(+)</span><h3>Acerto independente</h3><p>Resposta correta sem qualquer dica, na fase de independência. É reforçada e registrada como (+).</p></div>
+        <div class="card"><span class="tag">Dica</span><h3>Acerto com dica</h3><p>Resposta correta após uma dica programada. Registra-se a <b>dica ofertada</b> (AFT, AFP, AV, AI…). Vale no ensino inicial (most-to-least) e no least-to-most.</p></div>
+        <div class="card"><span class="tag" style="color:var(--rose);background:var(--rose-soft)">(−)</span><h3>Erro sem dica</h3><p>Resposta incorreta <b>antes</b> de qualquer dica. Depois, aplica-se o procedimento de correção.</p></div>
+        <div class="card"><span class="tag" style="color:var(--rose);background:var(--rose-soft)">(−)</span><h3>Erro com dica</h3><p>Resposta incorreta emitida <b>após</b> qualquer tipo de dica.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 3 · Registro ABA+" data-title="Quando está em (+)">
+    <div class="slide-inner">
+      <p class="eyebrow">Resumo operacional · programa em independente (+)</p>
+      <h2 class="title">Como registrar quando o alvo já está independente</h2>
+      <table class="syn">
+        <thead><tr><th>Situação observada</th><th>Houve dica?</th><th>Resposta</th><th>Registro</th></tr></thead>
+        <tbody>
+          <tr><td>Resposta correta independente</td><td>Não</td><td>Correta</td><td><b>(+)</b></td></tr>
+          <tr><td>Correta após ajuda física parcial</td><td>Sim</td><td>Correta</td><td><b>AFP</b></td></tr>
+          <tr><td>Correta após ajuda verbal</td><td>Sim</td><td>Correta</td><td><b>AV</b></td></tr>
+          <tr><td>Incorreta antes de qualquer ajuda</td><td>Não</td><td>Incorreta</td><td><b>(−)</b></td></tr>
+          <tr><td>Incorreta após qualquer ajuda</td><td>Sim</td><td>Incorreta</td><td><b>(−)</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 3 · Registro ABA+" data-title="Fluxo de registro">
+    <div class="slide-inner">
+      <p class="eyebrow">Padrão · fluxo de registro ABA+</p>
+      <h2 class="title">Como proceder, passo a passo</h2>
+      <div class="flow">
+        <div class="fstep"><span class="n">1</span><div class="ft"><b>Resposta correta sem ajuda</b><p>Registro: <b>(+)</b> → Reforçar.</p></div></div>
+        <div class="fstep"><span class="n">2</span><div class="ft"><b>Resposta correta após dica</b><p>Registro: <b>a dica utilizada</b> → Reforçar.</p></div></div>
+        <div class="fstep"><span class="n">3</span><div class="ft"><b>Resposta incorreta sem dica</b><p>Registro: <b>(−)</b> → Aplicar procedimento de correção.</p></div></div>
+        <div class="fstep"><span class="n">4</span><div class="ft"><b>Resposta incorreta após dica</b><p>Registro: <b>(−)</b> → Aplicar correção conforme o programa.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 3 · Registro ABA+" data-title="Procedimento de correção">
+    <div class="slide-inner">
+      <p class="eyebrow">Conceito</p>
+      <h2 class="title">Procedimento de correção</h2>
+      <p class="lead">Usado quando o programa está em <b>(+)</b> e esperava-se uma resposta independente, mas o aprendiz <b>errou por completo</b> antes de qualquer dica.</p>
+      <div class="callout info"><p class="ctitle">O que fazer</p>Reapresentar a demanda conforme o protocolo (com dica ou ausência de consequência, conforme o programa). Correção <b>não é "ajuda" solta</b> — é o procedimento descrito.</div>
+      <div class="callout amber"><p class="ctitle">Cuidado</p>Erro sem dica gera <b>correção</b>, não uma dica improvisada. Siga exatamente o que está no programa.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 3 · Registro ABA+" data-title="Vídeo: coleta de dados">
+    <div class="slide-inner">
+      <p class="eyebrow">Demonstração de procedimento</p>
+      <h2 class="title">Vídeo — coleta de dados em tempo real</h2>
+      <p class="subtitle">Observe o registro contínuo, durante a sessão (não de memória) e sincronizado com a resposta.</p>
+      <div class="video-slot" data-src="">
+        <div class="video-frame"><div class="video-empty"><div class="play">&#9658;</div><b>Slot de vídeo de demonstração</b><span>Cole o link abaixo ou deixe pré-carregado.</span></div></div>
+        <div class="video-add"><input type="text" placeholder="Cole o link do vídeo (YouTube, Vimeo ou .mp4)"><button>Carregar vídeo</button></div>
+        <p class="video-hint">Demonstração de procedimento.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 3 · Registro ABA+" data-title="Simulador de registro">
+    <div class="slide-inner">
+      <p class="eyebrow">Atividade-chave · simulador de registro</p>
+      <h2 class="title">Simulador — qual é o registro?</h2>
+      <p class="subtitle">Leia o cenário, escolha o registro e veja a justificativa. Contexto: alvo já em independência (+), salvo indicação.</p>
+      <div class="sim" data-answer="0">
+        <p class="scn">SD apresentado. Sem nenhuma dica, a criança responde corretamente.</p>
+        <p class="smeta">Registre</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> (+) acerto independente</button>
+          <button class="opt"><span class="ol">B</span> Registrar a dica</button>
+          <button class="opt"><span class="ol">C</span> (−) erro</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+      <div class="sim" data-answer="1">
+        <p class="scn">A terapeuta oferece AFP; em seguida a criança responde corretamente.</p>
+        <p class="smeta">Registre</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> (+) acerto independente</button>
+          <button class="opt"><span class="ol">B</span> AFP (a dica ofertada)</button>
+          <button class="opt"><span class="ol">C</span> (−) erro</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+      <div class="sim" data-answer="2">
+        <p class="scn">SD apresentado. Sem qualquer dica, a criança dá uma resposta incorreta.</p>
+        <p class="smeta">Registre</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> Registrar a dica</button>
+          <button class="opt"><span class="ol">B</span> (+) acerto independente</button>
+          <button class="opt"><span class="ol">C</span> (−) erro sem dica → depois, correção</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 3 · Registro ABA+" data-title="Prática: registro rápido">
+    <div class="slide-inner">
+      <p class="eyebrow">Atividade prática · registro rápido</p>
+      <h2 class="title">Decida em poucos segundos</h2>
+      <div class="quiz" data-answer="2">
+        <p class="q">A terapeuta deu ajuda verbal e, mesmo assim, a criança respondeu errado.</p>
+        <p class="qmeta">Selecione</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> Registrar AV (acerto com dica)</button>
+          <button class="opt"><span class="ol">B</span> Não registrar</button>
+          <button class="opt"><span class="ol">C</span> (−) erro com dica</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BLOCO 4 ============ -->
+  <section class="slide" data-block="Bloco 4 · Reforçamento diferencial" data-title="Abertura do Bloco 4">
+    <div class="slide-inner">
+      <p class="eyebrow">Bloco 4 · 40 min · prático</p>
+      <h2 class="title">Reforçamento diferencial</h2>
+      <p class="subtitle">A consequência precisa diferenciar claramente o desempenho: resposta independente vale mais do que resposta com dica. Há um padrão de tempos na clínica.</p>
+      <div class="pills"><span class="pill">Imediato</span><span class="pill">Valioso</span><span class="pill">Diferenciado pelo desempenho</span></div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 4 · Reforçamento diferencial" data-title="Tempos de reforço">
+    <div class="slide-inner">
+      <p class="eyebrow">Padrão da clínica · tempos de reforço</p>
+      <h2 class="title">Quanto tempo de reforço</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="num">15s</div><div class="lab">Resposta com dica total</div><div class="ctx">Ensino estruturado · ajuda mais intrusiva</div></div>
+        <div class="kpi"><div class="num">30s</div><div class="lab">Resposta com dica parcial</div><div class="ctx">Ensino estruturado · menos intrusiva</div></div>
+        <div class="kpi"><div class="num">1min</div><div class="lab">Resposta independente</div><div class="ctx">Ensino estruturado · sem ajuda</div></div>
+      </div>
+      <div class="callout info"><p class="ctitle">Ensino naturalístico</p>A própria consequência da brincadeira/interação já reforça — não há necessidade de reforço externo. Mas, se houve erro e uso de dica, a <b>demanda não pode demorar a ser refeita</b>.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 4 · Reforçamento diferencial" data-title="Magnitude diferenciada">
+    <div class="slide-inner">
+      <p class="eyebrow">Regra · diferenciação das consequências</p>
+      <h2 class="title">Independente vale mais que com dica</h2>
+      <table class="syn">
+        <thead><tr><th>Tipo de resposta</th><th>Magnitude</th><th>Tempo</th><th>Objetivo</th></tr></thead>
+        <tbody>
+          <tr><td><b>Resposta independente</b></td><td>Maior magnitude</td><td>Maior duração</td><td>Fortalecer respostas independentes</td></tr>
+          <tr><td><b>Resposta com dica</b></td><td>Menor (mas ainda reforçadora)</td><td>Menor duração</td><td>Manter a motivação sem equiparar ao independente</td></tr>
+        </tbody>
+      </table>
+      <div class="callout amber"><p class="ctitle">Regra</p>A diferenciação da consequência por desempenho precisa ficar <b>muito clara</b> — e as particularidades do reforço de cada aprendiz devem estar descritas no programa.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 4 · Reforçamento diferencial" data-title="Individualização">
+    <div class="slide-inner">
+      <p class="eyebrow">Decisão · individualização do tempo de reforço</p>
+      <h2 class="title">Ajustar ao aprendiz (com a supervisão)</h2>
+      <table class="syn">
+        <thead><tr><th>Situação do aprendiz</th><th>Recomendação</th></tr></thead>
+        <tbody>
+          <tr><td>Aceita demandas sucessivas sem dificuldade</td><td>Manter o tempo de reforço previsto no programa</td></tr>
+          <tr><td>Apresenta interferentes diante de muitas demandas seguidas</td><td>Considerar <b>aumentar</b> o tempo de reforço entre tentativas</td></tr>
+          <tr><td>Precisa de mais motivação para engajar</td><td>Ajustar magnitude/duração conforme o programa individualizado</td></tr>
+          <tr><td>Tem necessidades específicas de engajamento</td><td>O tempo de reforço deve estar descrito no escopo do programa</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 4 · Reforçamento diferencial" data-title="Vídeo: reforço diferencial">
+    <div class="slide-inner">
+      <p class="eyebrow">Demonstração de procedimento</p>
+      <h2 class="title">Vídeo — reforço diferencial na prática</h2>
+      <p class="subtitle">Observe a diferença de magnitude/tempo entre acerto independente e acerto com dica, e a entrega imediata.</p>
+      <div class="video-slot" data-src="">
+        <div class="video-frame"><div class="video-empty"><div class="play">&#9658;</div><b>Slot de vídeo de demonstração</b><span>Cole o link abaixo ou deixe pré-carregado.</span></div></div>
+        <div class="video-add"><input type="text" placeholder="Cole o link do vídeo (YouTube, Vimeo ou .mp4)"><button>Carregar vídeo</button></div>
+        <p class="video-hint">Demonstração de procedimento.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 4 · Reforçamento diferencial" data-title="Prática: ajustar o reforço">
+    <div class="slide-inner">
+      <p class="eyebrow">Atividade prática · decisão clínica</p>
+      <h2 class="title">Como você ajustaria?</h2>
+      <div class="reveal">
+        <button class="rbtn" onclick="this.parentElement.classList.add('shown')">Caso: aprendiz engaja em interferentes quando há muitas demandas seguidas — mostrar conduta</button>
+        <div class="rbody">Considerar <b>aumentar o tempo de reforço entre tentativas</b>, para reduzir interferentes e sustentar o trabalho da habilidade — registrando essa decisão e alinhando com a supervisão. Mantém-se a diferenciação: independente continua valendo mais.</div>
+      </div>
+      <div class="quiz" data-answer="1">
+        <p class="q">A criança acertou de forma independente. Como deve ser o reforço comparado a um acerto com dica?</p>
+        <p class="qmeta">Selecione</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> Igual ao acerto com dica</button>
+          <button class="opt"><span class="ol">B</span> Maior magnitude e/ou maior duração</button>
+          <button class="opt"><span class="ol">C</span> Menor, para não "viciar"</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BLOCO 5 ============ -->
+  <section class="slide" data-block="Bloco 5 · Integração prática" data-title="Erros comuns">
+    <div class="slide-inner">
+      <p class="eyebrow">Bloco 5 · 35 min · prático</p>
+      <h2 class="title">Erros mais comuns dos aplicadores</h2>
+      <p class="subtitle">Marque com a equipe os que mais aparecem na sua rotina — esses viram foco da checagem de fidelidade.</p>
+      <div class="checklist">
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Repetir o SD várias vezes</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Dar duas instruções ao mesmo tempo</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Reforçar respostas erradas</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Aplicar dicas diferentes do programa</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Conversar excessivamente durante o ensino</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Não registrar imediatamente</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Dar o SD sem a atenção da criança</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 5 · Integração prática" data-title="Role-play guiado">
+    <div class="slide-inner">
+      <p class="eyebrow">Prática em tríades · 12 min</p>
+      <h2 class="title">Role-play guiado</h2>
+      <p class="subtitle">Em grupos de três, alternem os papéis a cada rodada. Use um alvo simples e aplique tudo do dia: controle instrucional → dica → registro → reforço diferencial.</p>
+      <div class="roles">
+        <div class="role r1"><b>Aplicador(a)</b><ul><li>Confere HRE e atenção</li><li>SD claro e único</li><li>Dica conforme o critério</li><li>Reforço diferenciado</li></ul></div>
+        <div class="role r2"><b>Cliente</b><ul><li>Responde certo, errado e "não-resposta"</li><li>Cria oportunidades de correção</li></ul></div>
+        <div class="role r3"><b>Observador(a)</b><ul><li>Marca o registro a cada tentativa</li><li>Anota 1 acerto e 1 ajuste</li><li>Dá feedback ao final</li></ul></div>
+      </div>
+      <div class="callout info"><p class="ctitle">Feedback (modelo BST)</p>Reconhecimento primeiro, depois a correção em formato "a fazer". Conecta direto à <b>checagem de fidelidade</b> do próximo slide.</div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Bloco 5 · Integração prática" data-title="Mini-checagem de fidelidade">
+    <div class="slide-inner">
+      <p class="eyebrow">Autoavaliação · itens-chave do instrumento</p>
+      <h2 class="title">Mini-checagem de fidelidade</h2>
+      <p class="subtitle">Marque os itens que você cumpriu no role-play. Eles vêm do instrumento de fidelidade do Espaço Singular — é assim que a supervisão vai observar.</p>
+      <div class="checklist">
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Apresentei o SD claro e único</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Usei a hierarquia de dicas e desvaneci conforme o critério</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Entreguei o reforço contingente e dentro da janela (~3 s)</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Apliquei o procedimento de correção como descrito</div></div>
+        <div class="chk" onclick="this.classList.toggle('on')"><div class="box">&check;</div><div class="lbl">Registrei durante a sessão, de forma fiel e contínua</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FECHAMENTO ============ -->
+  <section class="slide" data-block="Fechamento" data-title="Provando seu conhecimento">
+    <div class="slide-inner">
+      <p class="eyebrow">Fechamento · quiz final</p>
+      <h2 class="title">Provando seu conhecimento</h2>
+      <div class="scorebar"><span class="big" id="scoreNum">0/0</span><span class="lab" id="scoreLab">Responda as questões abaixo — o placar conta só as deste slide.</span></div>
+      <div class="quiz scored" data-answer="1">
+        <p class="q">1. Antes de apresentar o SD, o aprendiz olha para outro lado e está mexendo noutro brinquedo. O que fazer?</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> Registrar (−), pois não respondeu</button>
+          <button class="opt"><span class="ol">B</span> Recuperar a atenção e reapresentar o SD (não registrar)</button>
+          <button class="opt"><span class="ol">C</span> Aplicar dica imediatamente</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+      <div class="quiz scored" data-answer="0">
+        <p class="q">2. Durante a aquisição de um alvo novo, qual hierarquia de dicas usamos?</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> Most-to-least</button>
+          <button class="opt"><span class="ol">B</span> Least-to-most</button>
+          <button class="opt"><span class="ol">C</span> Sem dicas, só correção</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+      <div class="quiz scored" data-answer="2">
+        <p class="q">3. A criança erra <b>antes</b> de qualquer dica, num alvo já em (+). Qual o registro e a conduta?</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> Registrar a dica e reforçar</button>
+          <button class="opt"><span class="ol">B</span> (+), pois é fase independente</button>
+          <button class="opt"><span class="ol">C</span> (−) erro sem dica → procedimento de correção</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+      <div class="quiz scored" data-answer="1">
+        <p class="q">4. Comparado a um acerto com dica, o reforço de um acerto independente deve ser…</p>
+        <div class="opts">
+          <button class="opt"><span class="ol">A</span> Idêntico</button>
+          <button class="opt"><span class="ol">B</span> Maior em magnitude e/ou duração</button>
+          <button class="opt"><span class="ol">C</span> Menor</button>
+        </div>
+        <div class="fb"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Fechamento" data-title="Três frases-chave">
+    <div class="slide-inner">
+      <p class="eyebrow">Síntese</p>
+      <h2 class="title">Três frases para levar</h2>
+      <div class="commit">
+        <div class="c"><span class="n">1</span><div>Muitas vezes o erro não é da criança — confira <b>HRE e atenção</b> antes do SD e diferencie <b>erro</b> de <b>não-resposta</b>.</div></div>
+        <div class="c"><span class="n">2</span><div>A dica existe para <b>ensinar independência</b>: most-to-least na aquisição, fading sempre, e o registro acompanha a fase do programa.</div></div>
+        <div class="c"><span class="n">3</span><div>A consequência <b>diferencia o desempenho</b>: independente vale mais que com dica — e o reforço é imediato, valioso e individualizado.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-block="Fechamento" data-title="Compromissos">
+    <div class="slide-inner">
+      <p class="eyebrow">Encerramento · próximos passos</p>
+      <h2 class="title">Compromissos de padronização</h2>
+      <ul class="clean">
+        <li>Confiro o controle instrucional <b>antes</b> de todo SD.</li>
+        <li>Sigo a hierarquia de dicas do programa e desvaneço — sem inventar níveis.</li>
+        <li>Registro durante a sessão, conforme os quatro registros do ABA+.</li>
+        <li>Diferencio a consequência por desempenho.</li>
+        <li>Em caso de dúvida, sigo o programa e consulto a supervisão.</li>
+      </ul>
+      <div class="callout info"><p class="ctitle">Acompanhamento</p>A supervisão fará checagens de fidelidade usando o instrumento do Espaço Singular. Próxima reobservação combinada ao final do treinamento.</div>
+      <p class="lead" style="margin-top:18px;color:var(--muted);font-size:13px;">Conteúdo de equipe · uso interno · Espaço Singular.</p>
+    </div>
+  </section>
+
+  </div><!-- /stage -->
+</div><!-- /deck -->
+
+<div class="footer">
+  <button class="nav" id="prevBtn" onclick="go(-1)">&#8592; Anterior</button>
+  <button class="nav primary" id="nextBtn" onclick="go(1)">Próximo &#8594;</button>
+  <span class="spacer"></span>
+  <div class="timer">
+    <span class="tlabel">Sessão</span>
+    <span id="clock">00:00</span>
+    <button onclick="toggleTimer()" id="tbtn">Iniciar</button>
+    <button onclick="resetTimer()">Zerar</button>
+  </div>
+</div>
+
+<div class="hintbar" id="hintbar">Use as setas &#8592; &#8594; do teclado para navegar</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeIndex()">
+  <div class="idxpanel">
+    <button class="idxclose" onclick="closeIndex()">Fechar</button>
+    <h3>Índice</h3>
+    <div id="idxbody"></div>
+  </div>
+</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let cur=0;
+
+function render(){
+  slides.forEach((s,i)=>s.classList.toggle('active',i===cur));
+  document.getElementById('counter').textContent=(cur+1)+' / '+slides.length;
+  document.getElementById('blocklabel').textContent=slides[cur].dataset.block||'';
+  document.getElementById('topfill').style.width=((cur+1)/slides.length*100)+'%';
+  document.getElementById('prevBtn').disabled=(cur===0);
+  document.getElementById('nextBtn').disabled=(cur===slides.length-1);
+  slides[cur].scrollTop=0;
+}
+function go(d){const n=cur+d;if(n>=0&&n<slides.length){cur=n;render();}}
+function jump(i){cur=i;render();closeIndex();}
+
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('overlay').classList.contains('show')&&e.key==='Escape'){closeIndex();return;}
+  const t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA')return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1);}
+  if(e.key==='ArrowLeft'){e.preventDefault();go(-1);}
+});
+
+/* ---------- Index ---------- */
+function openIndex(){
+  const body=document.getElementById('idxbody');body.innerHTML='';
+  let lastBlock=null,group=null;
+  slides.forEach((s,i)=>{
+    if(s.dataset.block!==lastBlock){
+      lastBlock=s.dataset.block;
+      group=document.createElement('div');group.className='idxgroup';
+      group.innerHTML='<p class="gl">'+lastBlock+'</p>';body.appendChild(group);
+    }
+    const link=document.createElement('div');link.className='idxlink';
+    link.innerHTML='<span>'+(s.dataset.title||'Slide')+'</span><span class="gi">'+(i+1)+'</span>';
+    link.onclick=()=>jump(i);group.appendChild(link);
+  });
+  document.getElementById('overlay').classList.add('show');
+}
+function closeIndex(){document.getElementById('overlay').classList.remove('show');}
+
+/* ---------- Quiz / Simulator ---------- */
+const SIM_FB={
+  good:'Correto. ',
+  bad:'Reveja: '
+};
+function wireQuiz(box,kind){
+  const ans=parseInt(box.dataset.answer,10);
+  const opts=[...box.querySelectorAll('.opt')];
+  const fb=box.querySelector('.fb');
+  opts.forEach((o,idx)=>{
+    o.addEventListener('click',()=>{
+      if(box.dataset.done)return;
+      box.dataset.done='1';
+      opts.forEach(x=>x.classList.add('disabled'));
+      opts[ans].classList.add('correct');
+      const correct=(idx===ans);
+      if(!correct)o.classList.add('wrong');
+      fb.className='fb show '+(correct?'good':'bad');
+      fb.textContent=(correct?'✓ Correto. ':'Quase — a resposta certa está destacada. ')+(box.dataset.explain||'');
+      if(box.classList.contains('scored'))updateScore();
+    });
+  });
+}
+document.querySelectorAll('.quiz,.sim').forEach(b=>wireQuiz(b));
+
+/* explanations for scored / sim items via data-explain set inline-free here */
+function setExplain(){
+  // simulator feedbacks
+  const sims=document.querySelectorAll('.sim');
+  const ex=['Sem dica e correto, na fase de independência → (+), reforça e registra.',
+            'Correto após dica → registra-se a dica ofertada (AFP).',
+            'Incorreta antes de qualquer dica → (−); depois, procedimento de correção.'];
+  sims.forEach((s,i)=>{s.dataset.explain=ex[i]||'';});
+}
+setExplain();
+
+function updateScore(){
+  const all=[...document.querySelectorAll('.quiz.scored')];
+  let answered=0,right=0;
+  all.forEach(q=>{
+    if(q.dataset.done){answered++;
+      const ans=parseInt(q.dataset.answer,10);
+      const opts=[...q.querySelectorAll('.opt')];
+      if(opts[ans].classList.contains('correct')&&!opts[ans].classList.contains('wrong')){
+        // determine if user picked correct: correct opt has 'correct'; wrong pick has 'wrong'
+      }
+    }
+  });
+  // recompute right by checking which option the user clicked
+  right=all.reduce((acc,q)=>{
+    if(!q.dataset.done)return acc;
+    const wrong=q.querySelector('.opt.wrong');
+    return acc+(wrong?0:1);
+  },0);
+  const el=document.getElementById('scoreNum');
+  el.textContent=right+'/'+all.length;
+  const lab=document.getElementById('scoreLab');
+  if(answered===all.length){
+    lab.textContent = right===all.length ? 'Excelente — padrão dominado!' :
+      right>=all.length-1 ? 'Muito bom. Revise o item destacado.' :
+      'Vale revisar os blocos correspondentes às questões erradas.';
+  }
+}
+
+/* ---------- Video slots ---------- */
+function embedURL(url){
+  url=url.trim();if(!url)return null;
+  let m;
+  if(m=url.match(/(?:youtube\.com\/.*v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/))
+    return '<iframe src="https://www.youtube.com/embed/'+m[1]+'" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>';
+  if(m=url.match(/vimeo\.com\/(?:video\/)?(\d+)/))
+    return '<iframe src="https://player.vimeo.com/video/'+m[1]+'" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>';
+  if(/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url))
+    return '<video controls preload="metadata" src="'+url+'"></video>';
+  // fallback: try as iframe
+  return '<iframe src="'+url+'" allowfullscreen></iframe>';
+}
+function mountVideo(slot,url){
+  const html=embedURL(url);
+  if(!html){return;}
+  slot.querySelector('.video-frame').innerHTML=html;
+  const add=slot.querySelector('.video-add');if(add)add.style.display='none';
+}
+document.querySelectorAll('.video-slot').forEach(slot=>{
+  const pre=slot.getAttribute('data-src');
+  if(pre&&pre.trim()){mountVideo(slot,pre);}
+  const input=slot.querySelector('.video-add input');
+  const btn=slot.querySelector('.video-add button');
+  if(btn)btn.addEventListener('click',()=>{if(input.value.trim())mountVideo(slot,input.value);});
+  if(input)input.addEventListener('keydown',e=>{if(e.key==='Enter'&&input.value.trim())mountVideo(slot,input.value);});
+});
+
+/* ---------- Session timer ---------- */
+let secs=0,tint=null;
+function fmt(s){const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;
+  return (h>0?String(h)+':':'')+String(m).padStart(h>0?2:1,'0')+':'+String(x).padStart(2,'0');}
+function tick(){secs++;document.getElementById('clock').textContent=fmt(secs);}
+function toggleTimer(){const b=document.getElementById('tbtn');
+  if(tint){clearInterval(tint);tint=null;b.textContent='Continuar';}
+  else{tint=setInterval(tick,1000);b.textContent='Pausar';}}
+function resetTimer(){clearInterval(tint);tint=null;secs=0;
+  document.getElementById('clock').textContent='00:00';document.getElementById('tbtn').textContent='Iniciar';}
+
+/* ---------- init ---------- */
+render();
+setTimeout(()=>{document.getElementById('hintbar').classList.add('show');
+  setTimeout(()=>document.getElementById('hintbar').classList.remove('show'),3200);},700);
+</script>
+</body>
+</html>
